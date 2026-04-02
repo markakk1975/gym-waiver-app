@@ -30,6 +30,7 @@
     "clear": "Löschen",
     "submit": "Unterschreiben und absenden",
     "required_fields": "Alle Felder sind erforderlich",
+    "invalid_date": "Ungültiges Datumsformat (TT/MM/JJJJ)",
     "age_error": "Sie müssen mindestens 18 Jahre alt sein, um das Fitnessstudio zu nutzen",
     "must_accept": "Sie müssen die Regeln akzeptieren",
     "must_sign": "Bitte unterschreiben Sie vor dem Absenden",

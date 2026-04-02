@@ -30,6 +30,7 @@
     "clear": "Clear",
     "submit": "Sign and submit",
     "required_fields": "All fields are required",
+    "invalid_date": "Invalid date format (DD/MM/YYYY)",
     "age_error": "You must be at least 18 years old to use the gym",
     "must_accept": "You must accept the gym rules",
     "must_sign": "Please sign before submitting",

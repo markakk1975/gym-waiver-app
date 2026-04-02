@@ -30,6 +30,7 @@
     "clear": "Borrar",
     "submit": "Firmar y enviar",
     "required_fields": "Todos los campos son obligatorios",
+    "invalid_date": "Formato de fecha inválido (DD/MM/YYYY)",
     "age_error": "Debe ser mayor de 18 años para usar el gimnasio",
     "must_accept": "Debe aceptar las normas de uso",
     "must_sign": "Debe firmar antes de enviar",
