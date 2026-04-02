@@ -118,19 +118,19 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
           <LanguageSelector />
         </div>
 
-        <h1 className="text-2xl font-bold text-hotel-primary mb-6 text-center">
+        <h1 className="text-xl sm:text-2xl font-bold text-hotel-primary mb-4 sm:mb-6 text-center">
           🏋️ {t('waiver.title')}
         </h1>
 
         <form ref={formRef} onSubmit={(e) => e.preventDefault()}>
           {/* Guest info fields */}
-          <div className="space-y-3 mb-6">
+          <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
             <input
               type="text"
               name="guest_name"
               placeholder={t('waiver.guest_name')}
               onChange={() => setError('')}
-              className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base sm:text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
             />
             <input
               type="text"
@@ -138,9 +138,9 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
               inputMode="numeric"
               placeholder={t('waiver.room_number')}
               onChange={() => setError('')}
-              className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base sm:text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
             />
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-sm text-gray-500 mb-1">{t('waiver.date_of_birth')}</label>
                 <input
@@ -172,11 +172,11 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
           </div>
 
           {/* Rules */}
-          <div className="bg-white border-2 border-gray-200 rounded-xl p-4 mb-6">
+          <div className="bg-white border-2 border-gray-200 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
             <h2 className="text-lg font-semibold text-hotel-primary mb-3">
               📋 {t('waiver.rules_title')}
             </h2>
-            <ol className="space-y-2 text-sm text-gray-700 list-decimal list-inside">
+            <ol className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-gray-700 list-decimal list-inside">
               {rules.map((rule, i) => (
                 <li key={i}>{rule}</li>
               ))}
@@ -184,7 +184,7 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
           </div>
 
           {/* Accept checkbox */}
-          <label className="flex items-start gap-3 mb-6 cursor-pointer select-none">
+          <label className="flex items-start gap-3 mb-4 sm:mb-6 cursor-pointer select-none">
             <input
               type="checkbox"
               name="accepted"
@@ -198,9 +198,9 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
         </form>
 
         {/* Signature (outside form to avoid canvas issues) */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-semibold text-hotel-primary">
+            <h2 className="text-base sm:text-lg font-semibold text-hotel-primary">
               ✍️ {t('waiver.signature')}
             </h2>
             <button
@@ -233,7 +233,7 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
         <button
           onClick={handleClick}
           disabled={loading}
-          className={`w-full text-xl font-semibold py-4 rounded-2xl shadow-lg transition-all duration-200 mb-8 ${
+          className={`w-full text-lg sm:text-xl font-semibold py-3 sm:py-4 rounded-2xl shadow-lg transition-all duration-200 mb-6 sm:mb-8 ${
             loading
               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
               : 'bg-hotel-primary text-white hover:bg-hotel-primary-light active:scale-95'
