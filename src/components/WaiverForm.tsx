@@ -10,12 +10,24 @@ interface Props {
   onBack: () => void
 }
 
+function getAge(birthDate: string): number {
+  const today = new Date()
+  const birth = new Date(birthDate)
+  let age = today.getFullYear() - birth.getFullYear()
+  const monthDiff = today.getMonth() - birth.getMonth()
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--
+  }
+  return age
+}
+
 export default function WaiverForm({ onSuccess, onBack }: Props) {
   const { t, i18n } = useTranslation()
   const sigRef = useRef<SignatureCanvas>(null)
   const [loading, setLoading] = useState(false)
   const [accepted, setAccepted] = useState(false)
   const [hasSigned, setHasSigned] = useState(false)
+  const [error, setError] = useState('')
   const [form, setForm] = useState({
     guest_name: '',
     room_number: '',
@@ -28,19 +40,35 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
 
   function updateField(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
+    setError('')
   }
 
-  const allFilled =
-    form.guest_name.trim() !== '' &&
-    form.room_number.trim() !== '' &&
-    form.date_of_birth !== '' &&
-    form.arrival_date !== '' &&
-    form.departure_date !== '' &&
-    accepted &&
-    hasSigned
-
   async function handleSubmit() {
-    if (!allFilled || !sigRef.current) return
+    setError('')
+
+    // Validate fields
+    if (!form.guest_name.trim() || !form.room_number.trim() ||
+        !form.date_of_birth || !form.arrival_date || !form.departure_date) {
+      setError(t('waiver.required_fields'))
+      return
+    }
+
+    // Silent age check (18+)
+    if (getAge(form.date_of_birth) < 18) {
+      setError(t('waiver.age_error'))
+      return
+    }
+
+    if (!accepted) {
+      setError(t('waiver.must_accept'))
+      return
+    }
+
+    if (!hasSigned || !sigRef.current || sigRef.current.isEmpty()) {
+      setError(t('waiver.must_sign'))
+      return
+    }
+
     setLoading(true)
 
     const data: GymWaiver = {
@@ -49,9 +77,13 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
       language: i18n.language,
     }
 
-    const { error } = await supabase.from('gym_waivers').insert(data)
+    const { error: dbError } = await supabase.from('gym_waivers').insert(data)
     setLoading(false)
-    if (!error) onSuccess()
+    if (dbError) {
+      setError(dbError.message)
+    } else {
+      onSuccess()
+    }
   }
 
   return (
@@ -136,7 +168,7 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
           <input
             type="checkbox"
             checked={accepted}
-            onChange={(e) => setAccepted(e.target.checked)}
+            onChange={(e) => { setAccepted(e.target.checked); setError('') }}
             className="mt-1 w-5 h-5 accent-hotel-primary"
           />
           <span className="text-base text-gray-700 font-medium">
@@ -162,7 +194,7 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
             <SignatureCanvas
               ref={sigRef}
               penColor="black"
-              onEnd={() => setHasSigned(true)}
+              onEnd={() => { setHasSigned(true); setError('') }}
               canvasProps={{
                 className: 'w-full',
                 style: { width: '100%', height: '150px' },
@@ -171,14 +203,19 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
           </div>
         </div>
 
-        {/* Submit */}
+        {/* Error message */}
+        {error && (
+          <p className="text-red-500 text-center font-medium mb-4">{error}</p>
+        )}
+
+        {/* Submit - always enabled, validates on click */}
         <button
           onClick={handleSubmit}
-          disabled={!allFilled || loading}
+          disabled={loading}
           className={`w-full text-xl font-semibold py-4 rounded-2xl shadow-lg transition-all duration-200 mb-8 ${
-            allFilled && !loading
-              ? 'bg-hotel-primary text-white hover:bg-hotel-primary-light active:scale-95'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            loading
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-hotel-primary text-white hover:bg-hotel-primary-light active:scale-95'
           }`}
         >
           {loading ? '...' : t('waiver.submit')} ✅
