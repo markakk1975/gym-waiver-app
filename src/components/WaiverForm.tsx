@@ -25,40 +25,39 @@ function getAge(dateStr: string): number {
 export default function WaiverForm({ onSuccess, onBack }: Props) {
   const { t, i18n } = useTranslation()
   const sigRef = useRef<SignatureCanvas>(null)
-  const formRef = useRef<HTMLFormElement>(null)
+  const nameRef = useRef<HTMLInputElement>(null)
+  const roomRef = useRef<HTMLInputElement>(null)
+  const birthRef = useRef<HTMLInputElement>(null)
+  const arrivalRef = useRef<HTMLInputElement>(null)
+  const departureRef = useRef<HTMLInputElement>(null)
+  const acceptRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [hasSigned, setHasSigned] = useState(false)
 
-  function readForm() {
-    if (!formRef.current) return null
-    const el = (name: string) => formRef.current!.querySelector<HTMLInputElement>(`[name="${name}"]`)
-    return {
-      guestName: (el('guest_name')?.value || '').trim(),
-      roomNumber: (el('room_number')?.value || '').trim(),
-      dateOfBirth: el('date_of_birth')?.value || '',
-      arrivalDate: el('arrival_date')?.value || '',
-      departureDate: el('departure_date')?.value || '',
-      accepted: el('accepted')?.checked ?? false,
-    }
-  }
-
   function handleClick() {
     // Force Safari iPad to commit pending date picker values
+    // Blur active element and all date inputs explicitly
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur()
     }
-    // Wait for blur to take effect, then submit
-    setTimeout(() => handleSubmit(), 100)
+    birthRef.current?.blur()
+    arrivalRef.current?.blur()
+    departureRef.current?.blur()
+    // Wait 300ms for Safari to commit values after blur
+    setTimeout(() => handleSubmit(), 300)
   }
 
   async function handleSubmit() {
     setError('')
 
-    const vals = readForm()
-    if (!vals) return
-
-    const { guestName, roomNumber, dateOfBirth, arrivalDate, departureDate, accepted } = vals
+    // Read directly from refs (bypasses React state entirely)
+    const guestName = (nameRef.current?.value || '').trim()
+    const roomNumber = (roomRef.current?.value || '').trim()
+    const dateOfBirth = birthRef.current?.value || ''
+    const arrivalDate = arrivalRef.current?.value || ''
+    const departureDate = departureRef.current?.value || ''
+    const accepted = acceptRef.current?.checked ?? false
 
     if (!guestName || !roomNumber || !dateOfBirth || !arrivalDate || !departureDate) {
       setError(t('waiver.required_fields'))
@@ -122,80 +121,78 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
           🏋️ {t('waiver.title')}
         </h1>
 
-        <form ref={formRef} onSubmit={(e) => e.preventDefault()}>
-          {/* Guest info fields */}
-          <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
-            <input
-              type="text"
-              name="guest_name"
-              placeholder={t('waiver.guest_name')}
-              onChange={() => setError('')}
-              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base sm:text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
-            />
-            <input
-              type="text"
-              name="room_number"
-              inputMode="numeric"
-              placeholder={t('waiver.room_number')}
-              onChange={() => setError('')}
-              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base sm:text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
-            />
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label className="block text-sm text-gray-500 mb-1">{t('waiver.date_of_birth')}</label>
-                <input
-                  type="date"
-                  name="date_of_birth"
-                  onChange={() => setError('')}
-                  className="w-full px-3 py-3 text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-500 mb-1">{t('waiver.arrival_date')}</label>
-                <input
-                  type="date"
-                  name="arrival_date"
-                  onChange={() => setError('')}
-                  className="w-full px-3 py-3 text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-500 mb-1">{t('waiver.departure_date')}</label>
-                <input
-                  type="date"
-                  name="departure_date"
-                  onChange={() => setError('')}
-                  className="w-full px-3 py-3 text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
-                />
-              </div>
+        {/* Guest info fields */}
+        <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
+          <input
+            ref={nameRef}
+            type="text"
+            placeholder={t('waiver.guest_name')}
+            onChange={() => setError('')}
+            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base sm:text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
+          />
+          <input
+            ref={roomRef}
+            type="text"
+            inputMode="numeric"
+            placeholder={t('waiver.room_number')}
+            onChange={() => setError('')}
+            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base sm:text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-sm text-gray-500 mb-1">{t('waiver.date_of_birth')}</label>
+              <input
+                ref={birthRef}
+                type="date"
+                onChange={() => setError('')}
+                className="w-full px-3 py-2.5 sm:py-3 text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-500 mb-1">{t('waiver.arrival_date')}</label>
+              <input
+                ref={arrivalRef}
+                type="date"
+                onChange={() => setError('')}
+                className="w-full px-3 py-2.5 sm:py-3 text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-500 mb-1">{t('waiver.departure_date')}</label>
+              <input
+                ref={departureRef}
+                type="date"
+                onChange={() => setError('')}
+                className="w-full px-3 py-2.5 sm:py-3 text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
+              />
             </div>
           </div>
+        </div>
 
-          {/* Rules */}
-          <div className="bg-white border-2 border-gray-200 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
-            <h2 className="text-lg font-semibold text-hotel-primary mb-3">
-              📋 {t('waiver.rules_title')}
-            </h2>
-            <ol className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-gray-700 list-decimal list-inside">
-              {rules.map((rule, i) => (
-                <li key={i}>{rule}</li>
-              ))}
-            </ol>
-          </div>
+        {/* Rules */}
+        <div className="bg-white border-2 border-gray-200 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
+          <h2 className="text-lg font-semibold text-hotel-primary mb-3">
+            📋 {t('waiver.rules_title')}
+          </h2>
+          <ol className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-gray-700 list-decimal list-inside">
+            {rules.map((rule, i) => (
+              <li key={i}>{rule}</li>
+            ))}
+          </ol>
+        </div>
 
-          {/* Accept checkbox */}
-          <label className="flex items-start gap-3 mb-4 sm:mb-6 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              name="accepted"
-              onChange={() => setError('')}
-              className="mt-1 w-5 h-5 accent-hotel-primary"
-            />
-            <span className="text-base text-gray-700 font-medium">
-              {t('waiver.accept_rules')}
-            </span>
-          </label>
-        </form>
+        {/* Accept checkbox */}
+        <label className="flex items-start gap-3 mb-4 sm:mb-6 cursor-pointer select-none">
+          <input
+            ref={acceptRef}
+            type="checkbox"
+            onChange={() => setError('')}
+            className="mt-1 w-5 h-5 accent-hotel-primary"
+          />
+          <span className="text-base text-gray-700 font-medium">
+            {t('waiver.accept_rules')}
+          </span>
+        </label>
 
         {/* Signature (outside form to avoid canvas issues) */}
         <div className="mb-4 sm:mb-6">
