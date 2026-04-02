@@ -15,6 +15,7 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
   const sigRef = useRef<SignatureCanvas>(null)
   const [loading, setLoading] = useState(false)
   const [accepted, setAccepted] = useState(false)
+  const [hasSigned, setHasSigned] = useState(false)
   const [form, setForm] = useState({
     guest_name: '',
     room_number: '',
@@ -36,8 +37,7 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
     form.arrival_date !== '' &&
     form.departure_date !== '' &&
     accepted &&
-    sigRef.current &&
-    !sigRef.current.isEmpty()
+    hasSigned
 
   async function handleSubmit() {
     if (!allFilled || !sigRef.current) return
@@ -151,7 +151,7 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
               ✍️ {t('waiver.signature')}
             </h2>
             <button
-              onClick={() => sigRef.current?.clear()}
+              onClick={() => { sigRef.current?.clear(); setHasSigned(false) }}
               className="text-sm text-gray-500 px-3 py-1 rounded-lg hover:bg-gray-100"
             >
               {t('waiver.clear')}
@@ -162,6 +162,7 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
             <SignatureCanvas
               ref={sigRef}
               penColor="black"
+              onEnd={() => setHasSigned(true)}
               canvasProps={{
                 className: 'w-full',
                 style: { width: '100%', height: '150px' },
