@@ -64,6 +64,29 @@
     "signature": "Unterschrift",
     "view": "Anzeigen",
     "no_data": "Keine Genehmigungen registriert",
-    "export_csv": "CSV exportieren"
+    "export_csv": "CSV exportieren",
+    "export_pdf": "PDF exportieren",
+    "tab_satisfaction": "Zufriedenheit",
+    "tab_gym": "Fitnessstudio",
+    "total_responses": "Gesamtantworten",
+    "avg_overall": "Gesamtdurchschnitt",
+    "this_week": "Diese Woche",
+    "this_month": "Dieser Monat",
+    "last_month": "Letzter Monat",
+    "custom": "Benutzerdefiniert",
+    "from": "Von",
+    "to": "Bis",
+    "apply": "Anwenden",
+    "trend": "Täglicher Trend",
+    "by_category": "Nach Kategorie",
+    "no_data_period": "Keine Daten für den ausgewählten Zeitraum"
+  },
+  "feedback": {
+    "rating_apartamento": "Apartment",
+    "rating_restaurantes": "Restaurants",
+    "rating_animacion": "Unterhaltung",
+    "rating_recepcion": "Rezeption / Personal",
+    "rating_instalaciones": "Einrichtungen",
+    "rating_housekeeping": "Housekeeping / Reinigung"
   }
 }

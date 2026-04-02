@@ -64,6 +64,29 @@
     "signature": "Signature",
     "view": "View",
     "no_data": "No authorizations registered",
-    "export_csv": "Export CSV"
+    "export_csv": "Export CSV",
+    "export_pdf": "Export PDF",
+    "tab_satisfaction": "Satisfaction",
+    "tab_gym": "Gym",
+    "total_responses": "Total Responses",
+    "avg_overall": "Overall Average",
+    "this_week": "This week",
+    "this_month": "This month",
+    "last_month": "Last month",
+    "custom": "Custom",
+    "from": "From",
+    "to": "To",
+    "apply": "Apply",
+    "trend": "Daily Trend",
+    "by_category": "By Category",
+    "no_data_period": "No data for the selected period"
+  },
+  "feedback": {
+    "rating_apartamento": "Apartment",
+    "rating_restaurantes": "Restaurants",
+    "rating_animacion": "Entertainment",
+    "rating_recepcion": "Reception / Staff",
+    "rating_instalaciones": "Facilities",
+    "rating_housekeeping": "Housekeeping"
   }
 }
