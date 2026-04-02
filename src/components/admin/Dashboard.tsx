@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../../lib/supabase'
+import { generateWaiverPdf } from '../../lib/generatePdf'
 import type { GymWaiverRow } from '../../lib/types'
 
 interface Props {
@@ -115,6 +116,7 @@ export default function Dashboard({ onLogout }: Props) {
                   <th className="px-4 py-3 font-semibold text-gray-600 hidden sm:table-cell">{t('admin.departure')}</th>
                   <th className="px-4 py-3 font-semibold text-gray-600">{t('admin.signed_at')}</th>
                   <th className="px-4 py-3 font-semibold text-gray-600">{t('admin.signature')}</th>
+                  <th className="px-4 py-3 font-semibold text-gray-600">PDF</th>
                 </tr>
               </thead>
               <tbody>
@@ -134,6 +136,14 @@ export default function Dashboard({ onLogout }: Props) {
                         className="text-hotel-primary hover:underline text-sm font-medium"
                       >
                         {t('admin.view')}
+                      </button>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => generateWaiverPdf(w)}
+                        className="px-3 py-1 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700"
+                      >
+                        📄 PDF
                       </button>
                     </td>
                   </tr>
