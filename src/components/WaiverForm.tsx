@@ -10,9 +10,23 @@ interface Props {
   onBack: () => void
 }
 
-function getAge(dateStr: string): number {
-  const birth = new Date(dateStr)
-  if (isNaN(birth.getTime())) return 0
+// Parse DD/MM/YYYY to Date
+function parseDate(input: string): Date | null {
+  const m = input.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/)
+  if (!m) return null
+  const d = new Date(+m[3], +m[2] - 1, +m[1])
+  return isNaN(d.getTime()) ? null : d
+}
+
+function toISO(input: string): string {
+  const d = parseDate(input)
+  if (!d) return input
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+function getAge(input: string): number {
+  const birth = parseDate(input)
+  if (!birth) return 0
   const today = new Date()
   let age = today.getFullYear() - birth.getFullYear()
   const monthDiff = today.getMonth() - birth.getMonth()
@@ -22,49 +36,42 @@ function getAge(dateStr: string): number {
   return age
 }
 
+// Auto-format: insert "/" after DD and MM
+function formatDateInput(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 8)
+  if (digits.length <= 2) return digits
+  if (digits.length <= 4) return digits.slice(0, 2) + '/' + digits.slice(2)
+  return digits.slice(0, 2) + '/' + digits.slice(2, 4) + '/' + digits.slice(4)
+}
+
 export default function WaiverForm({ onSuccess, onBack }: Props) {
   const { t, i18n } = useTranslation()
   const sigRef = useRef<SignatureCanvas>(null)
-  const nameRef = useRef<HTMLInputElement>(null)
-  const roomRef = useRef<HTMLInputElement>(null)
-  const birthRef = useRef<HTMLInputElement>(null)
-  const arrivalRef = useRef<HTMLInputElement>(null)
-  const departureRef = useRef<HTMLInputElement>(null)
-  const acceptRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [hasSigned, setHasSigned] = useState(false)
+  const [guestName, setGuestName] = useState('')
+  const [roomNumber, setRoomNumber] = useState('')
+  const [dateOfBirth, setDateOfBirth] = useState('')
+  const [arrivalDate, setArrivalDate] = useState('')
+  const [departureDate, setDepartureDate] = useState('')
+  const [accepted, setAccepted] = useState(false)
 
-  function handleClick() {
-    // Force Safari iPad to commit pending date picker values
-    // Blur active element and all date inputs explicitly
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur()
-    }
-    birthRef.current?.blur()
-    arrivalRef.current?.blur()
-    departureRef.current?.blur()
-    // Wait 300ms for Safari to commit values after blur
-    setTimeout(() => handleSubmit(), 300)
-  }
+  const rules = Array.from({ length: 12 }, (_, i) => t(`waiver.rule_${i + 1}`))
 
   async function handleSubmit() {
     setError('')
 
-    // Read directly from refs (bypasses React state entirely)
-    const guestName = (nameRef.current?.value || '').trim()
-    const roomNumber = (roomRef.current?.value || '').trim()
-    const dateOfBirth = birthRef.current?.value || ''
-    const arrivalDate = arrivalRef.current?.value || ''
-    const departureDate = departureRef.current?.value || ''
-    const accepted = acceptRef.current?.checked ?? false
-
-    if (!guestName || !roomNumber || !dateOfBirth || !arrivalDate || !departureDate) {
+    if (!guestName.trim() || !roomNumber.trim() || !dateOfBirth || !arrivalDate || !departureDate) {
       setError(t('waiver.required_fields'))
       return
     }
 
-    // Silent age check (18+)
+    if (!parseDate(dateOfBirth) || !parseDate(arrivalDate) || !parseDate(departureDate)) {
+      setError(t('waiver.invalid_date'))
+      return
+    }
+
     if (getAge(dateOfBirth) < 18) {
       setError(t('waiver.age_error'))
       return
@@ -83,11 +90,11 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
     setLoading(true)
 
     const data: GymWaiver = {
-      guest_name: guestName,
-      room_number: roomNumber,
-      date_of_birth: dateOfBirth,
-      arrival_date: arrivalDate,
-      departure_date: departureDate,
+      guest_name: guestName.trim(),
+      room_number: roomNumber.trim(),
+      date_of_birth: toISO(dateOfBirth),
+      arrival_date: toISO(arrivalDate),
+      departure_date: toISO(departureDate),
       signature_data: sigRef.current.toDataURL('image/png'),
       language: i18n.language,
     }
@@ -100,8 +107,6 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
       onSuccess()
     }
   }
-
-  const rules = Array.from({ length: 12 }, (_, i) => t(`waiver.rule_${i + 1}`))
 
   return (
     <div className="h-full overflow-y-auto bg-gradient-to-br from-hotel-bg to-white">
@@ -124,45 +129,51 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
         {/* Guest info fields */}
         <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
           <input
-            ref={nameRef}
             type="text"
             placeholder={t('waiver.guest_name')}
-            onChange={() => setError('')}
+            value={guestName}
+            onChange={(e) => { setGuestName(e.target.value); setError('') }}
             className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base sm:text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
           />
           <input
-            ref={roomRef}
             type="text"
             inputMode="numeric"
             placeholder={t('waiver.room_number')}
-            onChange={() => setError('')}
+            value={roomNumber}
+            onChange={(e) => { setRoomNumber(e.target.value); setError('') }}
             className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-base sm:text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
           />
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-sm text-gray-500 mb-1">{t('waiver.date_of_birth')}</label>
               <input
-                ref={birthRef}
-                type="date"
-                onChange={() => setError('')}
+                type="text"
+                inputMode="numeric"
+                placeholder="DD/MM/YYYY"
+                value={dateOfBirth}
+                onChange={(e) => { setDateOfBirth(formatDateInput(e.target.value)); setError('') }}
                 className="w-full px-3 py-2.5 sm:py-3 text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
               />
             </div>
             <div>
               <label className="block text-sm text-gray-500 mb-1">{t('waiver.arrival_date')}</label>
               <input
-                ref={arrivalRef}
-                type="date"
-                onChange={() => setError('')}
+                type="text"
+                inputMode="numeric"
+                placeholder="DD/MM/YYYY"
+                value={arrivalDate}
+                onChange={(e) => { setArrivalDate(formatDateInput(e.target.value)); setError('') }}
                 className="w-full px-3 py-2.5 sm:py-3 text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
               />
             </div>
             <div>
               <label className="block text-sm text-gray-500 mb-1">{t('waiver.departure_date')}</label>
               <input
-                ref={departureRef}
-                type="date"
-                onChange={() => setError('')}
+                type="text"
+                inputMode="numeric"
+                placeholder="DD/MM/YYYY"
+                value={departureDate}
+                onChange={(e) => { setDepartureDate(formatDateInput(e.target.value)); setError('') }}
                 className="w-full px-3 py-2.5 sm:py-3 text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:border-hotel-primary-light"
               />
             </div>
@@ -184,9 +195,9 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
         {/* Accept checkbox */}
         <label className="flex items-start gap-3 mb-4 sm:mb-6 cursor-pointer select-none">
           <input
-            ref={acceptRef}
             type="checkbox"
-            onChange={() => setError('')}
+            checked={accepted}
+            onChange={(e) => { setAccepted(e.target.checked); setError('') }}
             className="mt-1 w-5 h-5 accent-hotel-primary"
           />
           <span className="text-base text-gray-700 font-medium">
@@ -194,7 +205,7 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
           </span>
         </label>
 
-        {/* Signature (outside form to avoid canvas issues) */}
+        {/* Signature */}
         <div className="mb-4 sm:mb-6">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-base sm:text-lg font-semibold text-hotel-primary">
@@ -228,7 +239,7 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
 
         {/* Submit */}
         <button
-          onClick={handleClick}
+          onClick={handleSubmit}
           disabled={loading}
           className={`w-full text-lg sm:text-xl font-semibold py-3 sm:py-4 rounded-2xl shadow-lg transition-all duration-200 mb-6 sm:mb-8 ${
             loading
