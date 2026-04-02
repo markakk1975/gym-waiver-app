@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-export type DatePreset = 'this_week' | 'this_month' | 'last_month' | 'custom'
+export type DatePreset = 'today' | 'this_week' | 'this_month' | 'last_month' | 'custom'
 
 interface Props {
   onRangeChange: (start: string, end: string) => void
@@ -19,6 +19,8 @@ function getPresetDates(preset: DatePreset): { start: string; end: string } {
   const today = toLocalDate(now)
 
   switch (preset) {
+    case 'today':
+      return { start: today, end: today }
     case 'this_week': {
       const dayOfWeek = now.getDay() || 7
       const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayOfWeek + 1)
@@ -53,6 +55,7 @@ export default function DateRangeFilter({ onRangeChange }: Props) {
   }
 
   const presets: { key: DatePreset; label: string }[] = [
+    { key: 'today', label: t('admin.today') },
     { key: 'this_week', label: t('admin.this_week') },
     { key: 'this_month', label: t('admin.this_month') },
     { key: 'last_month', label: t('admin.last_month') },
