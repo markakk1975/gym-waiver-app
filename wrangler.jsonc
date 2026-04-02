@@ -1,0 +1,11 @@
+{
+  "name": "gym-waiver-app",
+  "compatibility_date": "2026-04-02",
+  "routes": [
+    { "pattern": "gym.myassist.me", "custom_domain": true }
+  ],
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
