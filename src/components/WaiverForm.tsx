@@ -30,19 +30,35 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
   const [error, setError] = useState('')
   const [hasSigned, setHasSigned] = useState(false)
 
+  function readForm() {
+    if (!formRef.current) return null
+    const el = (name: string) => formRef.current!.querySelector<HTMLInputElement>(`[name="${name}"]`)
+    return {
+      guestName: (el('guest_name')?.value || '').trim(),
+      roomNumber: (el('room_number')?.value || '').trim(),
+      dateOfBirth: el('date_of_birth')?.value || '',
+      arrivalDate: el('arrival_date')?.value || '',
+      departureDate: el('departure_date')?.value || '',
+      accepted: el('accepted')?.checked ?? false,
+    }
+  }
+
+  function handleClick() {
+    // Force Safari iPad to commit pending date picker values
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
+    // Wait for blur to take effect, then submit
+    setTimeout(() => handleSubmit(), 100)
+  }
+
   async function handleSubmit() {
     setError('')
 
-    if (!formRef.current) return
+    const vals = readForm()
+    if (!vals) return
 
-    // Read ALL values directly from the DOM form elements
-    const fd = new FormData(formRef.current)
-    const guestName = (fd.get('guest_name') as string || '').trim()
-    const roomNumber = (fd.get('room_number') as string || '').trim()
-    const dateOfBirth = fd.get('date_of_birth') as string || ''
-    const arrivalDate = fd.get('arrival_date') as string || ''
-    const departureDate = fd.get('departure_date') as string || ''
-    const accepted = formRef.current.querySelector<HTMLInputElement>('[name="accepted"]')?.checked ?? false
+    const { guestName, roomNumber, dateOfBirth, arrivalDate, departureDate, accepted } = vals
 
     if (!guestName || !roomNumber || !dateOfBirth || !arrivalDate || !departureDate) {
       setError(t('waiver.required_fields'))
@@ -215,7 +231,7 @@ export default function WaiverForm({ onSuccess, onBack }: Props) {
 
         {/* Submit */}
         <button
-          onClick={handleSubmit}
+          onClick={handleClick}
           disabled={loading}
           className={`w-full text-xl font-semibold py-4 rounded-2xl shadow-lg transition-all duration-200 mb-8 ${
             loading
